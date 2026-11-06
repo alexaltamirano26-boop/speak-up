@@ -4,7 +4,7 @@
 // Ablauf:
 //  1. Beim Start eröffnet die KI das Gespräch (z.B. "Next, please. Passport?")
 //  2. Du antwortest per Mikrofon oder Tastatur
-//  3. Claude liefert: Antwort in der Rolle + Feedback zu deinem Satz + Vokabeln
+//  3. Die KI liefert: Antwort in der Rolle + Feedback zu deinem Satz + Vokabeln
 //  4. Vokabeln & Fehler landen automatisch in der Datenbank (für den Trainer)
 //  5. "Beenden" → Auswertung mit Punktzahl
 // ─────────────────────────────────────────────────────────────
@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from 'react'
 import { db, addCard, recordErrors, topErrors } from '../lib/db'
 import { getScenario, getDifficulty } from '../data/scenarios'
 import { buildChatSystemPrompt, CHAT_SCHEMA, buildSummaryPrompt, SUMMARY_SCHEMA } from '../lib/prompts'
-import { chatTurn, summarize } from '../lib/claude'
+import { chatTurn, summarize } from '../lib/ai'
 import { speak, stopSpeaking, useSpeechRecognition, canListen } from '../lib/speech'
 import FeedbackCard from '../components/FeedbackCard'
 import SummaryView from '../components/SummaryView'
@@ -57,7 +57,7 @@ export default function ChatScreen({ scenarioId, difficulty: level, settings, on
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, busy, summary])
 
-  // ── Ein Gesprächszug: Verlauf an Claude schicken, Antwort verarbeiten ──
+  // ── Ein Gesprächszug: Verlauf an die KI schicken, Antwort verarbeiten ──
   async function runTurn(history) {
     setBusy(true)
     setError('')

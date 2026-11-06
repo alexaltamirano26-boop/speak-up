@@ -1,19 +1,14 @@
 // ─────────────────────────────────────────────────────────────
-// Einstellungen (API-Key, Modell, Sprache) – gespeichert im localStorage.
+// Einstellungen (Gemini-Key, Modell, Sprache) – gespeichert im localStorage.
 // ─────────────────────────────────────────────────────────────
 import { useState, useCallback } from 'react'
 
 const KEY = 'speakup-settings'
 
-export const MODELS = [
-  { id: 'claude-opus-5-5', label: 'Claude Opus 5.5 – beste Qualität (ca. 1,5 Cent pro Nachricht)' },
-  { id: 'claude-sonnet-5-5', label: 'Claude Sonnet 5.5 – schnell & gut (ca. 0,8 Cent)' },
-  { id: 'claude-haiku-5-5', label: 'Claude Haiku 5.5 – sehr günstig (unter 0,1 Cent)' },
-]
-
 const DEFAULTS = {
-  apiKey: '',
-  model: 'claude-opus-5-5',
+  apiKey: '', // Gemini-Key von aistudio.google.com
+  model: 'gemini-2.5-flash',
+  availableModels: [], // wird beim Speichern des Keys von Google abgefragt
   autoSpeak: true, // KI-Antworten automatisch vorlesen
   autoSend: true, // Spracheingabe nach dem Sprechen direkt absenden
   voiceName: '', // leer = beste US-Stimme automatisch wählen
@@ -21,7 +16,13 @@ const DEFAULTS = {
 
 export function loadSettings() {
   try {
-    return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) || '{}') }
+    const s = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) || '{}') }
+    // Alte Claude-Einstellungen aus der ersten Version verwerfen
+    if (s.apiKey.startsWith('sk-ant') || s.model.startsWith('claude')) {
+      s.apiKey = ''
+      s.model = DEFAULTS.model
+    }
+    return s
   } catch {
     return { ...DEFAULTS }
   }

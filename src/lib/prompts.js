@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────
-// Prompts & Antwort-Schemas für Claude
+// Prompts & Antwort-Schemas für die KI
 //
-// Das Herzstück der App: Claude bekommt eine Rolle (z.B. Grenzbeamter)
+// Das Herzstück der App: Die KI bekommt eine Rolle (z.B. Grenzbeamter)
 // und muss IMMER im festen JSON-Format antworten. So bekommen wir in
 // EINEM Aufruf: die Antwort im Rollenspiel + Feedback + neue Vokabeln.
 // ─────────────────────────────────────────────────────────────
@@ -57,12 +57,10 @@ ${frequentErrors.length ? `- Recurring mistakes so far: ${frequentErrors.join(',
 # Other fields
 - new_vocab: 0–3 useful words/phrases from THIS turn that a B1 learner may not know (from your reply or from the correction). Prefer practical American expressions. "en" = the phrase, "de" = German translation, "example" = short example sentence. Do not repeat basic words.
 - suggestions: exactly 2 short, natural things the learner could answer next (English), different in style (one simple, one more advanced).
-- goal_reached: true once the main goal of the situation is done (e.g. officer said "Welcome to the United States", the bill is paid). Then "reply" should close the scene naturally.
-
-Latency-sensitive; begin your visible answer immediately.`
+- goal_reached: true once the main goal of the situation is done (e.g. officer said "Welcome to the United States", the bill is paid). Then "reply" should close the scene naturally.`
 }
 
-// JSON-Schema: so MUSS die Antwort aussehen (Claude hält sich garantiert daran).
+// JSON-Schema: so MUSS die Antwort aussehen (die KI hält sich daran).
 export const CHAT_SCHEMA = {
   type: 'object',
   additionalProperties: false,

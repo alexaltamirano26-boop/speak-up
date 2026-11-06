@@ -1,6 +1,6 @@
 # Speak Up – Englisch für die USA 🇺🇸
 
-Eine Lern-App mit echten Gesprächen statt Einzelsätzen. Eine KI (Claude) spielt Rollen wie
+Eine Lern-App mit echten Gesprächen statt Einzelsätzen. Eine KI (Google Gemini, kostenlos) spielt Rollen wie
 Grenzbeamter, Kellner oder Texaner an der Bar. Du antwortest per Sprache oder Text und bekommst
 zu jedem Satz Feedback mit deutscher Erklärung.
 
@@ -15,7 +15,7 @@ zu jedem Satz Feedback mit deutscher Erklärung.
   - 💡 Antwortvorschläge, falls du hängst
   - **Auswertung** am Ende mit Punktzahl (ab 80 gilt das Szenario als gemeistert)
 - **Wörter**: Neue Vokabeln und deine Fehler werden automatisch gesammelt, dazu die Liste „häufigste Fehler“
-- Einstellungen: API-Key, Modell, Stimme, Backup
+- Einstellungen: kostenloser Gemini-Key, Modell, Stimme, Backup
 - PWA: Du kannst die App auf dem iPhone zum Homescreen hinzufügen
 
 ## Wie der Code aufgebaut ist
@@ -26,8 +26,8 @@ src/
 ├── data/
 │   └── scenarios.js         ⭐ Alle Szenarien & Schwierigkeitsstufen (hier neue hinzufügen!)
 ├── lib/
-│   ├── prompts.js           ⭐ Anweisungen an Claude + JSON-Format der Antworten
-│   ├── claude.js            Verbindung zur Claude API, Fehlermeldungen auf Deutsch
+│   ├── prompts.js           ⭐ Anweisungen an die KI + JSON-Format der Antworten
+│   ├── ai.js                Verbindung zur Gemini API, Modellwechsel bei Limit, Fehler auf Deutsch
 │   ├── speech.js            Mikrofon (Spracherkennung) & Vorlesen (Sprachausgabe)
 │   ├── db.js                Lokale Datenbank (IndexedDB): Gespräche, Karten, Fehler
 │   └── settings.js          Einstellungen im localStorage
@@ -43,7 +43,7 @@ src/
 
 ### Der wichtigste Trick: Ein Aufruf, drei Ergebnisse
 
-Bei jeder Nachricht schickt die App den Gesprächsverlauf an Claude. Claude **muss** im
+Bei jeder Nachricht schickt die App den Gesprächsverlauf an Gemini. Die KI **muss** im
 festen JSON-Format antworten (`CHAT_SCHEMA` in `prompts.js`):
 
 ```json
@@ -68,7 +68,7 @@ festen JSON-Format antworten (`CHAT_SCHEMA` in `prompts.js`):
 | ein neues Szenario (z.B. Mietwagen) | `src/data/scenarios.js`: ein Objekt kopieren und anpassen |
 | strengeres oder lockereres Feedback | `src/lib/prompts.js`, Abschnitt „Feedback rules“ |
 | andere Farben | `src/index.css`, Block `@theme` |
-| ein günstigeres Modell als Standard | `src/lib/settings.js`, `DEFAULTS.model` |
+| die bevorzugten Modelle | `src/lib/ai.js`, Liste `PREFERRED` |
 
 ## Lokal starten
 
@@ -92,5 +92,13 @@ Einmalig musst du im Repo unter **Settings → Pages → Source** „**GitHub Ac
 
 ## Datenschutz
 
-Alles bleibt auf deinem Gerät. Nur der Gesprächstext geht zur Verarbeitung an die Claude API,
-und zwar mit deinem eigenen API-Key, der ebenfalls nur lokal gespeichert ist.
+Alles bleibt auf deinem Gerät. Nur der Gesprächstext geht zur Verarbeitung an die Gemini API,
+mit deinem eigenen API-Key, der ebenfalls nur lokal gespeichert ist. Achtung: Im kostenlosen
+Kontingent darf Google die Texte zur Verbesserung seiner Produkte verwenden.
+
+## Kosten
+
+Keine. GitHub Pages, Spracherkennung, Sprachausgabe und das Gratis-Kontingent der Gemini API
+sind kostenlos. Wichtig: Hinterlege in Google AI Studio **kein Abrechnungskonto**, dann kann
+auch nichts berechnet werden. Ist das Tageslimit erreicht, wechselt die App automatisch auf ein
+„lite“-Modell; ist auch das aufgebraucht, geht es am nächsten Tag weiter.

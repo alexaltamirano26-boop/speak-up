@@ -32,7 +32,7 @@ export default function ScenariosScreen({ hasKey, onStart, onGoSettings }) {
 
       {!hasKey && (
         <button onClick={onGoSettings} className="mt-4 w-full rounded-xl bg-amber-50 p-3 text-left text-sm text-amber-800 ring-1 ring-amber-200">
-          ⚠️ Zuerst brauchst du einen Claude-API-Key → <span className="underline">Einstellungen</span>
+          ⚠️ Zuerst brauchst du einen kostenlosen Gemini-API-Key → <span className="underline">Einstellungen</span>
         </button>
       )}
 

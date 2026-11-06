@@ -2,19 +2,29 @@
 // Einstellungen: API-Key, Modell, Stimme, Spracheingabe
 // ─────────────────────────────────────────────────────────────
 import { useState } from 'react'
-import { MODELS } from '../lib/settings'
+import { listModels, pickDefaultModel } from '../lib/ai'
 import { useVoices, speak, canListen, canSpeak, unlockSpeech } from '../lib/speech'
 import { db } from '../lib/db'
 
 export default function SettingsScreen({ settings, update }) {
   const voices = useVoices()
   const [keyDraft, setKeyDraft] = useState(settings.apiKey)
-  const [saved, setSaved] = useState(false)
+  const [status, setStatus] = useState({ state: 'idle', msg: '' }) // idle | checking | ok | error
 
-  function saveKey() {
-    update({ apiKey: keyDraft.trim() })
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+  // Key speichern UND direkt bei Google prüfen. Dabei erfahren wir auch,
+  // welche Modelle dein Key benutzen darf.
+  async function saveKey() {
+    const key = keyDraft.trim()
+    if (!key) return
+    setStatus({ state: 'checking', msg: '' })
+    try {
+      const models = await listModels(key)
+      const model = models.includes(settings.model) ? settings.model : pickDefaultModel(models)
+      update({ apiKey: key, availableModels: models, model })
+      setStatus({ state: 'ok', msg: `✓ Key funktioniert – Modell: ${model}` })
+    } catch (err) {
+      setStatus({ state: 'error', msg: err.message })
+    }
   }
 
   async function exportData() {
@@ -35,35 +45,47 @@ export default function SettingsScreen({ settings, update }) {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-brand-900">Einstellungen</h1>
 
-      <Card title="Claude API-Key">
-        <p className="text-sm text-slate-500">
-          Erstelle einen Key auf <a className="text-brand-600 underline" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noreferrer">console.anthropic.com</a>.
-          Er wird nur auf diesem Gerät gespeichert.
-        </p>
+      <Card title="Gemini API-Key (kostenlos)">
+        <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-600">
+          <li>Öffne <a className="text-brand-600 underline" href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">aistudio.google.com/apikey</a> und melde dich mit deinem Google-Konto an.</li>
+          <li>Tippe auf <b>„API-Schlüssel erstellen“</b> (bzw. „Create API key“).</li>
+          <li>Kopiere den Schlüssel (beginnt mit <code>AIza…</code>) und füge ihn hier ein.</li>
+        </ol>
         <input
           type="password"
           value={keyDraft}
           onChange={(e) => setKeyDraft(e.target.value)}
-          placeholder="sk-ant-…"
+          placeholder="AIza…"
           className="mt-3 w-full rounded-xl bg-slate-100 px-3 py-2.5 font-mono text-sm outline-none focus:ring-2 focus:ring-brand-600"
           autoComplete="off"
         />
-        <button onClick={saveKey} className="mt-2 w-full rounded-xl bg-brand-700 py-2.5 font-semibold text-white">
-          {saved ? '✓ Gespeichert' : 'Speichern'}
+        <button onClick={saveKey} disabled={status.state === 'checking'} className="mt-2 w-full rounded-xl bg-brand-700 py-2.5 font-semibold text-white disabled:opacity-60">
+          {status.state === 'checking' ? 'Prüfe …' : 'Speichern & prüfen'}
         </button>
+        {status.msg && (
+          <p className={`mt-2 text-sm ${status.state === 'ok' ? 'text-green-700' : 'text-red-600'}`}>{status.msg}</p>
+        )}
+        <p className="mt-2 text-xs text-slate-400">
+          Der Key wird nur auf diesem Gerät gespeichert. Kostenlos, solange du kein Abrechnungskonto hinterlegst.
+          Im Gratis-Modus kann Google die Texte zur Verbesserung nutzen – schreib also nichts Privates.
+        </p>
       </Card>
 
-      <Card title="KI-Modell">
-        <div className="space-y-2">
-          {MODELS.map((m) => (
-            <label key={m.id} className="flex items-start gap-2 text-sm">
-              <input type="radio" name="model" checked={settings.model === m.id} onChange={() => update({ model: m.id })} className="mt-1" />
-              <span>{m.label}</span>
-            </label>
-          ))}
-        </div>
-        <p className="mt-2 text-xs text-slate-400">Kosten sind grobe Schätzungen. 15 Minuten Üben mit Opus ≈ 20–30 Cent.</p>
-      </Card>
+      {settings.availableModels?.length > 0 && (
+        <Card title="KI-Modell">
+          <select
+            value={settings.model}
+            onChange={(e) => update({ model: e.target.value })}
+            className="w-full rounded-xl bg-slate-100 px-3 py-2.5 text-sm"
+          >
+            {settings.availableModels.map((m) => <option key={m} value={m}>{m}</option>)}
+          </select>
+          <p className="mt-2 text-xs text-slate-400">
+            „flash“ = bessere Qualität, „flash-lite“ = höheres Gratis-Limit. Ist das Tageslimit erreicht,
+            wechselt die App automatisch auf ein anderes Modell.
+          </p>
+        </Card>
+      )}
 
       <Card title="Stimme (Sprachausgabe)">
         {!canSpeak ? (
