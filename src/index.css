@@ -1,0 +1,28 @@
+@import 'tailwindcss';
+
+/* Farben der App an einer Stelle – hier ändern, um das Design anzupassen */
+@theme {
+  --color-brand-50: #eff4ff;
+  --color-brand-100: #dbe5fe;
+  --color-brand-600: #2747b5;
+  --color-brand-700: #1e3a8a;
+  --color-brand-900: #14245a;
+  --color-accent: #dc2626;
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+html, body, #root { height: 100%; }
+body {
+  background: #f8fafc;
+  color: #0f172a;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+:root { color-scheme: light; }
+
+/* Pulsierender Ring um den Mikrofon-Knopf während der Aufnahme */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgb(220 38 38 / 0.5); }
+  100% { box-shadow: 0 0 0 18px rgb(220 38 38 / 0); }
+}
+.recording { animation: pulse-ring 1.2s ease-out infinite; }
